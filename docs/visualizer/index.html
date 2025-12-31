@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MA'AT Lyapunov PR Visualizer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔮 MA'AT Lyapunov PR Visualizer</h1>
+            <p class="subtitle">Pull Request Convergence Dynamics & Constitutional Governance</p>
+        </header>
+
+        <div class="controls">
+            <button id="refreshBtn" class="btn btn-primary">🔄 Refresh Data</button>
+            <button id="toggleGridBtn" class="btn btn-secondary">📊 Toggle Grid</button>
+            <label for="filterState" class="sr-only">Filter by PR state</label>
+            <select id="filterState" class="select" aria-label="Filter pull requests by state">
+                <option value="all">All States</option>
+                <option value="stable">Stable</option>
+                <option value="unstable">Unstable</option>
+                <option value="critical">Critical</option>
+                <option value="in_flight">In-Flight</option>
+            </select>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-card">
+                <div class="stat-value" id="totalPRs">-</div>
+                <div class="stat-label">Total PRs</div>
+            </div>
+            <div class="stat-card stable">
+                <div class="stat-value" id="stablePRs">-</div>
+                <div class="stat-label">Stable</div>
+            </div>
+            <div class="stat-card unstable">
+                <div class="stat-value" id="unstablePRs">-</div>
+                <div class="stat-label">Unstable</div>
+            </div>
+            <div class="stat-card critical">
+                <div class="stat-value" id="criticalPRs">-</div>
+                <div class="stat-label">Critical</div>
+            </div>
+            <div class="stat-card in-flight">
+                <div class="stat-value" id="inFlightPRs">-</div>
+                <div class="stat-label">In-Flight</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgScore">-</div>
+                <div class="stat-label">Avg Score</div>
+            </div>
+        </div>
+
+        <div class="visualization">
+            <canvas id="lyapunovCanvas" aria-label="Lyapunov field visualization showing PR trajectories. Each dot represents a pull request positioned by its stability score. Green dots are stable, yellow are unstable, red are critical, and blue are in-flight."></canvas>
+            <div id="tooltip" class="tooltip"></div>
+        </div>
+
+        <div class="pr-list">
+            <h2>Pull Request Details</h2>
+            <div id="prListContainer"></div>
+        </div>
+
+        <footer>
+            <p>Last Updated: <span id="lastUpdated">-</span></p>
+            <p>
+                <a href="https://github.com/alengluhic20-oss/contributor_covenant" target="_blank" rel="noopener noreferrer" title="View repository on GitHub (opens in new tab)">Repository</a> | 
+                <a href="../.maatyselfai/constitution.md" target="_blank" rel="noopener noreferrer" title="View constitutional governance document (opens in new tab)">Constitution</a> |
+                <a href="../data/trajectories.json" target="_blank" rel="noopener noreferrer" title="View raw trajectory data JSON (opens in new tab)">Raw Data</a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="lyapunov.js"></script>
+</body>
+</html>
