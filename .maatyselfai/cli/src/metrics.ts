@@ -4,6 +4,8 @@ import { PullRequest, fetchReviews, fetchComments, fetchCommits, fetchCheckRuns 
 // Constants for metric calculations
 const NEUTRAL_SCORE = 0.5;
 const DEFAULT_METRIC_VALUE = 0.5;
+const MAX_CHURN_LINES = 500; // Lines of code change considered high churn
+const MAX_CONFLICT_FILES = 20; // Number of files where conflict probability reaches max
 
 interface Config {
   metrics: Record<string, { weight: number; description: string }>;
@@ -40,7 +42,7 @@ function calculateCodeChurn(pr: PullRequest): number {
   
   // Lower churn is better (more stable)
   // Normalize: smaller changes relative to size = better
-  const churnRatio = Math.min(totalChanges / 500, 1); // Cap at 500 lines
+  const churnRatio = Math.min(totalChanges / MAX_CHURN_LINES, 1);
   return 1 - churnRatio;
 }
 
@@ -85,7 +87,7 @@ function calculateMergeConflicts(pr: PullRequest): number {
   // This is a placeholder for actual conflict detection
   if (pr.state === 'closed' || pr.merged_at) return 1; // No conflicts
   
-  const conflictProbability = Math.min(pr.changed_files / 20, 1);
+  const conflictProbability = Math.min(pr.changed_files / MAX_CONFLICT_FILES, 1);
   return 1 - (conflictProbability * 0.3); // Assume 30% max conflict impact
 }
 

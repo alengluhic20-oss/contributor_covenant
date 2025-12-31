@@ -1,6 +1,11 @@
 // MA'AT Lyapunov PR Visualizer
 // Renders PR trajectory data on a 2D Lyapunov field
 
+// Configuration constants
+const GRID_STEP_SIZE = 50; // pixels
+const STABLE_THRESHOLD = 0.7;
+const UNSTABLE_THRESHOLD = 0.4;
+
 class LyapunovVisualizer {
     constructor() {
         this.canvas = document.getElementById('lyapunovCanvas');
@@ -10,6 +15,12 @@ class LyapunovVisualizer {
         this.data = null;
         this.showGrid = true;
         this.filterState = 'all';
+        
+        // Thresholds - could be loaded from config in future
+        this.thresholds = {
+            stable: STABLE_THRESHOLD,
+            unstable: UNSTABLE_THRESHOLD
+        };
         
         this.colors = {
             stable: '#28a745',
@@ -171,10 +182,8 @@ class LyapunovVisualizer {
         this.ctx.strokeStyle = '#e0e0e0';
         this.ctx.lineWidth = 1;
         
-        const step = 50;
-        
         // Vertical lines
-        for (let x = 0; x < this.width; x += step) {
+        for (let x = 0; x < this.width; x += GRID_STEP_SIZE) {
             this.ctx.beginPath();
             this.ctx.moveTo(x, 0);
             this.ctx.lineTo(x, this.height);
@@ -182,7 +191,7 @@ class LyapunovVisualizer {
         }
         
         // Horizontal lines
-        for (let y = 0; y < this.height; y += step) {
+        for (let y = 0; y < this.height; y += GRID_STEP_SIZE) {
             this.ctx.beginPath();
             this.ctx.moveTo(0, y);
             this.ctx.lineTo(this.width, y);
@@ -205,8 +214,8 @@ class LyapunovVisualizer {
         this.ctx.fillRect(0, 0, this.width, this.height);
         
         // Draw threshold lines
-        const stableY = this.height * (1 - 0.7);
-        const unstableY = this.height * (1 - 0.4);
+        const stableY = this.height * (1 - this.thresholds.stable);
+        const unstableY = this.height * (1 - this.thresholds.unstable);
         
         this.ctx.setLineDash([5, 5]);
         this.ctx.strokeStyle = '#28a745';
@@ -228,9 +237,9 @@ class LyapunovVisualizer {
         this.ctx.fillStyle = '#333';
         this.ctx.font = '12px sans-serif';
         this.ctx.textAlign = 'right';
-        this.ctx.fillText('Stable (≥0.7)', this.width - 10, stableY - 5);
-        this.ctx.fillText('Unstable (≥0.4)', this.width - 10, unstableY - 5);
-        this.ctx.fillText('Critical (<0.4)', this.width - 10, this.height - 10);
+        this.ctx.fillText(`Stable (≥${this.thresholds.stable})`, this.width - 10, stableY - 5);
+        this.ctx.fillText(`Unstable (≥${this.thresholds.unstable})`, this.width - 10, unstableY - 5);
+        this.ctx.fillText(`Critical (<${this.thresholds.unstable})`, this.width - 10, this.height - 10);
     }
     
     drawTrajectories() {
