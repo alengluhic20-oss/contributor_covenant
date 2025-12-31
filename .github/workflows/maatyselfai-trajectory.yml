@@ -1,0 +1,85 @@
+name: MA'AT Lyapunov Trajectory Computation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  pull_request_review:
+    types: [submitted, edited, dismissed]
+  pull_request_review_comment:
+    types: [created, edited, deleted]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  compute-trajectory:
+    runs-on: ubuntu-latest
+    name: Compute PR Trajectories
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: .maatyselfai/cli/package-lock.json
+      
+      - name: Checkout main branch files
+        run: |
+          git checkout origin/${{ github.event.repository.default_branch }} -- .maatyselfai/
+          git reset HEAD .maatyselfai/cli/node_modules/ 2>/dev/null || true
+          git reset HEAD .maatyselfai/cli/dist/ 2>/dev/null || true
+      
+      - name: Install dependencies
+        working-directory: .maatyselfai/cli
+        run: npm ci || npm install
+      
+      - name: Build CLI
+        working-directory: .maatyselfai/cli
+        run: npm run build
+      
+      - name: Compute trajectories
+        working-directory: .maatyselfai/cli
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: npm run compute
+      
+      - name: Commit and push trajectories
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Create docs/data directory if it doesn't exist
+          mkdir -p docs/data
+          
+          # Copy trajectory data
+          if [ -f docs/data/trajectories.json ]; then
+            git add docs/data/trajectories.json
+            
+            if git diff --cached --quiet; then
+              echo "No changes to commit"
+            else
+              git commit -m "Update PR trajectories - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+              git push
+            fi
+          else
+            echo "No trajectory data generated"
+          fi
+      
+      - name: Upload trajectory artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-trajectories
+          path: docs/data/trajectories.json
+          retention-days: 30
+          if-no-files-found: warn

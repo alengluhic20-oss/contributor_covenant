@@ -1,0 +1,58 @@
+# MA'AT Lyapunov PR Visualizer Configuration
+# Defines metrics weights and governance parameters for PR trajectory analysis
+
+version: "1.0"
+
+# Metric weights for Lyapunov stability calculation
+metrics:
+  # Code quality metrics
+  code_churn:
+    weight: 0.15
+    description: "Lines of code changed relative to PR size"
+  
+  review_engagement:
+    weight: 0.25
+    description: "Number and quality of review comments"
+  
+  conversation_sentiment:
+    weight: 0.20
+    description: "Sentiment analysis of PR discussions"
+  
+  test_coverage:
+    weight: 0.15
+    description: "Impact on test coverage"
+  
+  ci_stability:
+    weight: 0.15
+    description: "CI/CD pipeline success rate"
+  
+  merge_conflicts:
+    weight: 0.10
+    description: "Presence and severity of merge conflicts"
+
+# Governance thresholds
+thresholds:
+  stable: 0.7      # PRs with score >= 0.7 are considered stable
+  unstable: 0.4    # PRs with score < 0.4 are considered unstable
+  critical: 0.2    # PRs with score < 0.2 require immediate attention
+
+# Visualization settings
+visualization:
+  field_resolution: 50      # Grid resolution for Lyapunov field
+  trajectory_length: 100    # Maximum trajectory points
+  color_scheme:
+    stable: "#28a745"       # Green
+    unstable: "#ffc107"     # Yellow
+    critical: "#dc3545"     # Red
+    in_flight: "#007bff"    # Blue
+
+# GitHub integration
+github:
+  events:
+    - pull_request
+    - pull_request_review
+    - pull_request_review_comment
+  
+  artifacts:
+    retention_days: 30
+    path: "docs/data"

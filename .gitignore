@@ -7,3 +7,9 @@
 # Other
 .nova/
 .hugo_build.lock
+
+# MA'AT CLI
+.maatyselfai/cli/node_modules/
+.maatyselfai/cli/dist/
+.maatyselfai/cli/package-lock.json
+*.log
