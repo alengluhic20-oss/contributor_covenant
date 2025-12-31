@@ -50,9 +50,10 @@ class LyapunovVisualizer {
     
     async loadData() {
         try {
-            const response = await fetch('../data/trajectories.json');
+            const dataPath = '../data/trajectories.json';
+            const response = await fetch(dataPath);
             if (!response.ok) {
-                throw new Error('Failed to load trajectory data');
+                throw new Error(`Failed to load trajectory data from ${dataPath} (HTTP ${response.status})`);
             }
             
             this.data = await response.json();
@@ -330,6 +331,7 @@ class LyapunovVisualizer {
     }
     
     escapeHtml(text) {
+        if (!text) return '';
         const map = {
             '&': '&amp;',
             '<': '&lt;',
@@ -337,7 +339,7 @@ class LyapunovVisualizer {
             '"': '&quot;',
             "'": '&#039;'
         };
-        return text.replace(/[&<>"']/g, m => map[m]);
+        return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 }
 

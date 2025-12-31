@@ -18,7 +18,8 @@ export interface PullRequest {
 export async function fetchPullRequests(
   octokit: Octokit,
   owner: string,
-  repo: string
+  repo: string,
+  maxPRs: number = 20
 ): Promise<PullRequest[]> {
   try {
     const { data } = await octokit.pulls.list({
@@ -31,7 +32,7 @@ export async function fetchPullRequests(
     });
 
     const detailedPRs = await Promise.all(
-      data.slice(0, 20).map(async (pr) => {
+      data.slice(0, maxPRs).map(async (pr) => {
         try {
           const { data: details } = await octokit.pulls.get({
             owner,

@@ -1,6 +1,10 @@
 import { Octokit } from '@octokit/rest';
 import { PullRequest, fetchReviews, fetchComments, fetchCommits, fetchCheckRuns } from './github';
 
+// Constants for metric calculations
+const NEUTRAL_SCORE = 0.5;
+const DEFAULT_METRIC_VALUE = 0.5;
+
 interface Config {
   metrics: Record<string, { weight: number; description: string }>;
   thresholds: {
@@ -55,7 +59,7 @@ function calculateReviewEngagement(reviewCount: number, commentCount: number): n
 function calculateSentiment(commentCount: number): number {
   // Simple heuristic: more comments generally indicates engagement
   // This is a placeholder for actual sentiment analysis
-  if (commentCount === 0) return 0.5; // Neutral
+  if (commentCount === 0) return NEUTRAL_SCORE; // Neutral
   if (commentCount < 3) return 0.6; // Slight positive
   if (commentCount < 10) return 0.7; // Positive
   return 0.8; // Very positive
@@ -64,7 +68,7 @@ function calculateSentiment(commentCount: number): number {
 function calculateTestCoverage(pr: PullRequest): number {
   // Heuristic: if changed_files includes test files, assume coverage maintained
   // This is a placeholder for actual coverage analysis
-  if (pr.changed_files === 0) return 0.5;
+  if (pr.changed_files === 0) return NEUTRAL_SCORE;
   
   // Assume some test files present based on file count
   const estimatedTestFiles = Math.floor(pr.changed_files * 0.3);
@@ -72,7 +76,7 @@ function calculateTestCoverage(pr: PullRequest): number {
 }
 
 function calculateCIStability(checkRuns: { total: number; successful: number }): number {
-  if (checkRuns.total === 0) return 0.5; // No CI, neutral
+  if (checkRuns.total === 0) return NEUTRAL_SCORE; // No CI, neutral
   return checkRuns.successful / checkRuns.total;
 }
 
@@ -140,12 +144,12 @@ export async function computeMetrics(
     
     // Return default metrics on error
     const defaultDetails: MetricDetails = {
-      code_churn: 0.5,
-      review_engagement: 0.5,
-      conversation_sentiment: 0.5,
-      test_coverage: 0.5,
-      ci_stability: 0.5,
-      merge_conflicts: 0.5
+      code_churn: DEFAULT_METRIC_VALUE,
+      review_engagement: DEFAULT_METRIC_VALUE,
+      conversation_sentiment: DEFAULT_METRIC_VALUE,
+      test_coverage: DEFAULT_METRIC_VALUE,
+      ci_stability: DEFAULT_METRIC_VALUE,
+      merge_conflicts: DEFAULT_METRIC_VALUE
     };
     
     return { score: null, details: defaultDetails };

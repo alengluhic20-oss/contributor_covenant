@@ -50,9 +50,16 @@ async function computeTrajectories(): Promise<void> {
   const config = await loadConfig();
   console.log('✓ Configuration loaded');
 
-  // Get repository info from environment or default
-  const repoOwner = process.env.GITHUB_REPOSITORY_OWNER || 'alengluhic20-oss';
-  const repoName = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'contributor_covenant';
+  // Get repository info from environment or fail with error
+  const repoOwner = process.env.GITHUB_REPOSITORY_OWNER;
+  const repoName = process.env.GITHUB_REPOSITORY?.split('/')[1];
+  
+  if (!repoOwner || !repoName) {
+    console.error('❌ GITHUB_REPOSITORY_OWNER and GITHUB_REPOSITORY must be set');
+    console.error('   Example: GITHUB_REPOSITORY=owner/repo GITHUB_REPOSITORY_OWNER=owner');
+    process.exit(1);
+  }
+  
   const token = process.env.GITHUB_TOKEN;
 
   if (!token) {
@@ -63,8 +70,9 @@ async function computeTrajectories(): Promise<void> {
   const octokit = new Octokit({ auth: token });
   console.log(`✓ GitHub client initialized for ${repoOwner}/${repoName}`);
 
-  // Fetch pull requests
-  const pullRequests = await fetchPullRequests(octokit, repoOwner, repoName);
+  // Fetch pull requests (limit configurable via environment)
+  const maxPRs = parseInt(process.env.MAX_PRS || '20', 10);
+  const pullRequests = await fetchPullRequests(octokit, repoOwner, repoName, maxPRs);
   console.log(`✓ Fetched ${pullRequests.length} pull requests`);
 
   // Compute metrics and trajectories
