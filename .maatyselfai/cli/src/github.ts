@@ -101,13 +101,8 @@ export async function fetchComments(
   prNumber: number
 ): Promise<number> {
   try {
-    const [reviews, comments, issueComments] = await Promise.all([
+    const [reviews, issueComments] = await Promise.all([
       octokit.pulls.listReviewComments({
-        owner,
-        repo,
-        pull_number: prNumber
-      }),
-      octokit.pulls.listComments({
         owner,
         repo,
         pull_number: prNumber
@@ -119,7 +114,7 @@ export async function fetchComments(
       })
     ]);
 
-    return reviews.data.length + comments.data.length + issueComments.data.length;
+    return reviews.data.length + issueComments.data.length;
   } catch (error) {
     return 0;
   }

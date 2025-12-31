@@ -144,7 +144,7 @@ async function computeTrajectories(): Promise<void> {
   };
 
   console.log(`\n📊 Summary:`);
-  console.log(`   Total PRs: ${output.summary.total_prs}`);
+  console.log(`   Total PRs: ${output.summary?.total_prs || 0}`);
   console.log(`   Stable: ${stableCount}`);
   console.log(`   Unstable: ${unstableCount}`);
   console.log(`   Critical: ${criticalCount}`);

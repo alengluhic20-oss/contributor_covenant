@@ -1,5 +1,4 @@
 import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -32,7 +31,12 @@ function getAjv(): Ajv {
   }
 
   ajvInstance = new Ajv({ allErrors: true });
-  addFormats(ajvInstance);
+  // Add basic format support
+  ajvInstance.addFormat('date-time', {
+    validate: (dateTimeString: string) => {
+      return !isNaN(Date.parse(dateTimeString));
+    }
+  });
   return ajvInstance;
 }
 
@@ -47,7 +51,7 @@ export function validateTrajectory(data: any): ValidationResult {
     if (!valid) {
       return {
         valid: false,
-        errors: validate.errors
+        errors: validate.errors || []
       };
     }
 
